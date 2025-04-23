@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>JF Text Generator</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        textarea { width: 100%; }
+    </style>
+</head>
+<body>
+    <h2>Generador de respuestas</h2>
+    <form method="post">
+        <label for="texto">Pega tu pregunta o texto:</label><br>
+        <textarea id="texto" name="texto" rows="6"></textarea><br><br>
+        <button type="submit">Generar respuesta</button>
+    </form>
+    {% if respuesta %}
+        <hr>
+        <h3>Respuesta generada:</h3>
+        <p>{{ respuesta }}</p>
+    {% endif %}
+</body>
+</html>
