@@ -16,10 +16,10 @@ def generar_respuesta(texto):
     data = {
         "inputs": texto,
         "parameters": {
-            "temperature": 0.75,
-            "top_p": 0.9,
-            "max_new_tokens": 150,
-            "repetition_penalty": 1.1
+            "temperature": 0.7,         # Más natural
+            "top_p": 0.9,               # Equilibrado
+            "max_new_tokens": 400,      # Ensayos más largos
+            "repetition_penalty": 1.1   # Menos repeticiones
         }
     }
     response = requests.post(
@@ -28,11 +28,14 @@ def generar_respuesta(texto):
         json=data
     )
     if response.status_code == 200:
-        resultado = response.json()
-        if isinstance(resultado, list) and "generated_text" in resultado[0]:
-            return resultado[0]["generated_text"]
-        else:
-            return "Respuesta inválida del modelo."
+        try:
+            resultado = response.json()
+            if isinstance(resultado, list) and "generated_text" in resultado[0]:
+                return resultado[0]["generated_text"]
+            else:
+                return "No se encontró el texto generado."
+        except Exception as e:
+            return f"Error al procesar respuesta: {str(e)}"
     else:
         return f"Error al generar respuesta. Código: {response.status_code}"
 
