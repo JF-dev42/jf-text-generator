@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import requests
 import os
 from dotenv import load_dotenv
@@ -9,42 +9,46 @@ app = Flask(__name__)
 
 API_TOKEN = os.getenv("API_TOKEN")
 
-def generar_respuesta(texto):
+@app.route('/')
+def home():
+    return render_template("index.html")
+
+@app.route('/generate', methods=["POST"])
+def generate():
+    data = request.get_json()
+    texto = data.get("text", "")
+
     headers = {
         "Authorization": f"Bearer {API_TOKEN}"
     }
-    data = {
+    payload = {
         "inputs": texto,
         "parameters": {
-            "temperature": 0.7,         # Más natural
-            "top_p": 0.9,               # Equilibrado
-            "max_new_tokens": 400,      # Ensayos más largos
-            "repetition_penalty": 1.1   # Menos repeticiones
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "max_new_tokens": 400,
+            "repetition_penalty": 1.1
         }
     }
+
     response = requests.post(
         "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1",
         headers=headers,
-        json=data
+        json=payload
     )
+
     if response.status_code == 200:
         try:
             resultado = response.json()
             if isinstance(resultado, list) and "generated_text" in resultado[0]:
-                return resultado[0]["generated_text"]
+                return jsonify({"result": resultado[0]["generated_text"]})
             else:
-                return "No se encontró el texto generado."
+                return jsonify({"result": "No se encontró el texto generado."})
         except Exception as e:
-            return f"Error al procesar respuesta: {str(e)}"
+            return jsonify({"result": f"Error al procesar respuesta: {str(e)}"})
     else:
-        return f"Error al generar respuesta. Código: {response.status_code}"
+        return jsonify({"result": f"Error del modelo. Código: {response.status_code}"})
 
-@app.route('/', methods=["GET", "POST"])
-def home():
-    respuesta = ""
-    if request.method == "POST":
-        texto = request.form["texto"]
-        respuesta = generar_respuesta(texto)
-    return render_template("index.html", respuesta=respuesta)
 
-app.run(host="0.0.0.0", port=81)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=81)
