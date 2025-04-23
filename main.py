@@ -23,13 +23,16 @@ def generar_respuesta(texto):
         }
     }
     response = requests.post(
-        "https://api-inference.huggingface.co/models/bigscience/bloom-560m",
+     "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"   ,
         headers=headers,
         json=data
     )
     if response.status_code == 200:
-        resultado = response.json()
+    resultado = response.json()
+    if isinstance(resultado, list) and "generated_text" in resultado[0]:
         return resultado[0]["generated_text"]
+    else:
+        return "Respuesta inválida del modelo."
     else:
         return "Error al generar respuesta."
 
