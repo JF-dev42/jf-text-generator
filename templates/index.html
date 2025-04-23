@@ -1,24 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>JF Text Generator</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-        textarea { width: 100%; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JF Text Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding: 20px; }
+    .response-box { white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px; }
+    .history-box { margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <h2>Generador de respuestas</h2>
-    <form method="post">
-        <label for="texto">Pega tu pregunta o texto:</label><br>
-        <textarea id="texto" name="texto" rows="6"></textarea><br><br>
-        <button type="submit">Generar respuesta</button>
-    </form>
-    {% if respuesta %}
-        <hr>
-        <h3>Respuesta generada:</h3>
-        <p>{{ respuesta }}</p>
-    {% endif %}
+  <div class="container">
+    <h2 class="mb-4">Generador de respuestas</h2>
+
+    <label for="userInput" class="form-label">Pega tu pregunta o texto:</label>
+    <textarea class="form-control" id="userInput" rows="4" placeholder="Escribí o pegá algo acá..."></textarea>
+
+    <button class="btn btn-primary mt-3" onclick="generateResponse()">Generar respuesta</button>
+
+    <div id="outputContainer" class="mt-4 d-none">
+      <h5>Respuesta generada:</h5>
+      <div class="response-box" id="outputText"></div>
+      <button class="btn btn-outline-secondary mt-2" onclick="copyToClipboard()">Copiar respuesta</button>
+    </div>
+
+    <div class="history-box">
+      <h5>Historial:</h5>
+      <ul class="list-group" id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    async function generateResponse() {
+      const text = document.getElementById("userInput").value;
+
+      const res = await fetch("/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      const data = await res.json();
+      const result = data.result || "Error al generar respuesta.";
+
+      document.getElementById("outputText").textContent = result;
+      document.getElementById("outputContainer").classList.remove("d-none");
+
+      // Guardar en historial
+      const historyList = document.getElementById("historyList");
+      const newItem = document.createElement("li");
+      newItem.className = "list-group-item";
+      newItem.textContent = text;
+      historyList.prepend(newItem);
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("outputText").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Respuesta copiada!");
+      });
+    }
+  </script>
 </body>
 </html>
