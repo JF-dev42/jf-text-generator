@@ -23,7 +23,7 @@ def generar_respuesta(texto):
         }
     }
     response = requests.post(
-        "https://api-inference.huggingface.co/models/bigscience/bloom-560m",
+        "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1",
         headers=headers,
         json=data
     )
